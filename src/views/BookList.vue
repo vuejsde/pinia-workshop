@@ -40,10 +40,6 @@ export default defineComponent({
   },
   created() {
     this.getBooks();
-    const watchlistStore = useWatchlistStore();
-    watchlistStore.$subscribe((mutation, state) => {
-      console.log(`${mutation.storeId} updated, new state is: `, state.list);
-    });
   },
 });
 </script>

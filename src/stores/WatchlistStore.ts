@@ -8,7 +8,7 @@ export type WatchlistStore = {
 export const useWatchlistStore = defineStore('WatchlistStore', {
   state: () =>
     ({
-      list: new Map(),
+      list: new Map(JSON.parse(localStorage.getItem('watchlist') ?? '[]')),
     } as WatchlistStore),
   getters: {
     count: (state) => state.list.size,
@@ -28,6 +28,7 @@ export const useWatchlistStore = defineStore('WatchlistStore', {
       }
     },
     clear() {
+      localStorage.setItem('watchlist', JSON.stringify([]));
       this.$reset();
     },
   },
