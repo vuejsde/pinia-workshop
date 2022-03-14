@@ -6,12 +6,12 @@
 import { defineComponent } from 'vue';
 
 import BookTableList from '../components/BookTableList.vue';
-import http from '@/utils/http';
 import type { Book } from '../types';
+import { mapActions, mapState } from 'pinia';
+import { useBookStore } from '@/stores/BookStore';
 
 type ComponentData = {
   search: string;
-  books: Book[];
   watchedBooks: Map<string, Book>;
 };
 
@@ -23,9 +23,11 @@ export default defineComponent({
   data(): ComponentData {
     return {
       search: '',
-      books: [],
       watchedBooks: new Map(),
     };
+  },
+  computed: {
+    ...mapState(useBookStore, ['books']),
   },
   methods: {
     addToWatchlist(book: Book) {
@@ -36,10 +38,7 @@ export default defineComponent({
         this.watchedBooks.set(isbn, book);
       }
     },
-    async getBooks() {
-      const books = await http<Book[]>('http://localhost:4730/books');
-      this.books = books;
-    },
+    ...mapActions(useBookStore, ['getBooks']),
   },
   created() {
     this.getBooks();
