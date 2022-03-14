@@ -1,36 +1,31 @@
 <template>
+  <button @click="clear" v-if="count">Clear</button>
   <BookTableList :books="books" plain />
+  <p v-if="!count" class="message info">
+    There is nothing here yet! You can go ahead and add books to your watchlist from the books page
+  </p>
 </template>
 
 <script lang="ts">
+import { useWatchlistStore } from '@/stores/WatchlistStore';
+import { mapState, mapActions } from 'pinia';
 import { defineComponent } from 'vue';
 
 import BookTableList from '../components/BookTableList.vue';
-import http from '@/utils/http';
-import type { Book } from '../types';
-
-type ComponentData = {
-  books: Book[];
-};
 
 export default defineComponent({
   name: 'BookWatchlist',
   components: {
     BookTableList,
   },
-  data(): ComponentData {
-    return {
-      books: [],
-    };
+  computed: {
+    ...mapState(useWatchlistStore, {
+      books: (state) => Array.from(state.list.values()),
+      count: 'count',
+    }),
   },
   methods: {
-    async getBooks() {
-      const books = await http<Book[]>('http://localhost:4730/books');
-      this.books = books;
-    },
-  },
-  created() {
-    this.getBooks();
+    ...mapActions(useWatchlistStore, ['clear']),
   },
 });
 </script>
