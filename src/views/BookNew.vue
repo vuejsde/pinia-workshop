@@ -61,8 +61,9 @@
 import { defineComponent } from 'vue';
 
 import type { Book } from '@/types';
-import { post } from '@/utils/http';
 import { required, minLength } from '@/utils/validations';
+import { mapActions } from 'pinia';
+import { useBookStore } from '@/stores/BookStore';
 
 type ComponentData = {
   book: Partial<Book>;
@@ -99,14 +100,11 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useBookStore, ['create']),
     async submit() {
       this.success = false;
 
-      await post<Book>(`http://localhost:4730/books`, this.book, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await this.create(this.book);
 
       this.book = {
         title: '',
