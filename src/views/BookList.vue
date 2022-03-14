@@ -9,10 +9,10 @@ import BookTableList from '../components/BookTableList.vue';
 import type { Book } from '../types';
 import { mapActions, mapState } from 'pinia';
 import { useBookStore } from '@/stores/BookStore';
+import { useWatchlistStore } from '@/stores/WatchlistStore';
 
 type ComponentData = {
   search: string;
-  watchedBooks: Map<string, Book>;
 };
 
 export default defineComponent({
@@ -23,22 +23,20 @@ export default defineComponent({
   data(): ComponentData {
     return {
       search: '',
-      watchedBooks: new Map(),
     };
   },
   computed: {
     ...mapState(useBookStore, ['books']),
+    ...mapState(useWatchlistStore, {
+      watchedBooks: 'list',
+    }),
   },
   methods: {
-    addToWatchlist(book: Book) {
-      const isbn = book.isbn;
-      if (this.watchedBooks.has(isbn)) {
-        this.watchedBooks.delete(isbn);
-      } else {
-        this.watchedBooks.set(isbn, book);
-      }
-    },
     ...mapActions(useBookStore, ['getBooks']),
+    ...mapActions(useWatchlistStore, ['update']),
+    addToWatchlist(book: Book) {
+      this.update(book);
+    },
   },
   created() {
     this.getBooks();

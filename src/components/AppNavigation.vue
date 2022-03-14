@@ -58,15 +58,14 @@ import { defineComponent } from 'vue';
 import { mapState } from 'pinia';
 
 import { useAuthStore } from '@/stores/AuthStore';
+import { useWatchlistStore } from '@/stores/WatchlistStore';
 
 export default defineComponent({
-  data() {
-    return {
-      watchlistItems: 6,
-    };
-  },
   computed: {
     ...mapState(useAuthStore, ['email', 'isAuthenticated']),
+    ...mapState(useWatchlistStore, {
+      watchlistItems: 'count',
+    }),
   },
 });
 </script>
