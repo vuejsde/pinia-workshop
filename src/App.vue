@@ -9,6 +9,7 @@
 import { defineComponent } from 'vue';
 import AppNavigation from '@/components/AppNavigation.vue';
 import { useAuthStore } from './stores/AuthStore';
+import { useWatchlistStore } from './stores/WatchlistStore';
 
 export default defineComponent({
   name: 'App',
@@ -25,6 +26,12 @@ export default defineComponent({
           console.log('Login completed', authStore.authToken);
         });
       }
+    });
+
+    const watchlistStore = useWatchlistStore();
+    watchlistStore.$subscribe((mutation, state) => {
+      console.log(JSON.stringify(state.list));
+      localStorage.setItem('watchlist', JSON.stringify([...state.list]));
     });
   },
 });
