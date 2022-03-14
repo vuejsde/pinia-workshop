@@ -18,10 +18,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapWritableState } from 'pinia';
+import { mapActions } from 'pinia';
 
-import { useAuthStore, type User } from '@/stores/AuthStore';
-import { post } from '@/utils/http';
+import { useAuthStore } from '@/stores/AuthStore';
 
 type ComponentData = {
   user: {
@@ -42,27 +41,13 @@ export default defineComponent({
       success: false,
     };
   },
-  computed: {
-    ...mapWritableState(useAuthStore, {
-      authUser: 'user',
-      authToken: 'authToken',
-    }),
-  },
   methods: {
-    async submit() {
+    ...mapActions(useAuthStore, ['login']),
+    submit() {
       this.success = false;
 
-      const response = await post<{
-        accessToken: string | null;
-        user: User | null;
-      }>(`http://localhost:4730/login`, this.user, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      this.login(this.user);
 
-      this.authToken = response.accessToken;
-      this.authUser = response.user;
       this.success = true;
     },
   },

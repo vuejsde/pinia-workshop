@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { post } from '@/utils/http';
 
 export type User = {
   email: string;
@@ -20,6 +21,21 @@ export const useAuthStore = defineStore('AuthStore', {
     email: (state) => state.user?.email ?? '',
     isAuthenticated(): boolean {
       return !!this.email;
+    },
+  },
+  actions: {
+    async login(user: { email: string; password: string }) {
+      const response = await post<{
+        accessToken: string | null;
+        user: User | null;
+      }>(`http://localhost:4730/login`, user, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      this.authToken = response.accessToken;
+      this.user = response.user;
     },
   },
 });
