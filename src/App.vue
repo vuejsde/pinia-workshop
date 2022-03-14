@@ -8,11 +8,24 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppNavigation from '@/components/AppNavigation.vue';
+import { useAuthStore } from './stores/AuthStore';
 
 export default defineComponent({
   name: 'App',
   components: {
     AppNavigation,
+  },
+  created() {
+    const authStore = useAuthStore();
+    authStore.$onAction(({ name, args, after }) => {
+      if (name === 'login') {
+        console.log(`Triggered 'LOGIN', with the following args`, args);
+        console.log('There is no authToken yet:', authStore.authToken);
+        after(() => {
+          console.log('Login completed', authStore.authToken);
+        });
+      }
+    });
   },
 });
 </script>
