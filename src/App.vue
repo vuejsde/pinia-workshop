@@ -16,7 +16,7 @@ export default defineComponent({
   components: {
     AppNavigation,
   },
-  created() {
+  setup() {
     const authStore = useAuthStore();
     authStore.$onAction(({ name, args, after }) => {
       if (name === 'login') {
@@ -30,7 +30,6 @@ export default defineComponent({
 
     const watchlistStore = useWatchlistStore();
     watchlistStore.$subscribe((mutation, state) => {
-      console.log(JSON.stringify(state.list));
       localStorage.setItem('watchlist', JSON.stringify([...state.list]));
     });
   },

@@ -1,39 +1,38 @@
-import { defineStore, storeToRefs } from 'pinia';
-import { get, post } from '@/utils/http';
 import type { Book } from '@/types';
+import http, { post } from '@/utils/http';
+import { defineStore, storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useAuthStore } from './AuthStore';
 
-export type BookState = {
-  books: Array<Book>;
-};
+export const useBookStore = defineStore('BookStore', () => {
+  const books = ref<Book[]>([]);
+  const { user } = storeToRefs(useAuthStore());
 
-export const useBookStore = defineStore('BookStore', {
-  state: () =>
-    ({
-      books: [],
-    } as BookState),
-  getters: {},
-  actions: {
-    async getBooks() {
-      const books = await get<Book[]>('http://localhost:4730/books');
+  async function get() {
+    const booksResponse = await http<Book[]>('http://localhost:4730/books');
+    books.value = booksResponse;
+  }
 
-      this.books = books;
-    },
-    async create(book: Partial<Book>) {
-      const { user } = storeToRefs(useAuthStore());
-      const newBook = await post<Book>(
-        `http://localhost:4730/books`,
-        {
-          ...book,
-          userId: user.value?.id,
+  async function create(book: Partial<Book>) {
+    const newBook = await post<Book>(
+      `http://localhost:4730/books`,
+      {
+        ...book,
+        userId: user.value?.id ?? null,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-      this.books.push(newBook);
-    },
-  },
+      },
+    );
+
+    books.value.push(newBook);
+  }
+
+  return {
+    books,
+    get,
+    create,
+  };
 });

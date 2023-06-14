@@ -27,10 +27,10 @@
               d="m17 19.09l2.45 1.49l-.65-2.81l2.2-1.88l-2.89-.25L17 13l-1.13 2.64l-2.87.25l2.18 1.88l-.68 2.81l2.5-1.49M4 14h8v2H4v-2m0-8h12v2H4V6m0 4h12v2H4v-2Z"
             ></path>
           </svg>
-          <span class="badge">{{ watchlistItems }}</span>
+          <span class="badge">{{ size }}</span>
         </div>
       </router-link>
-      <div v-if="isAuthenticated" class="user">
+      <div v-if="isLoggedIn" class="user">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -47,7 +47,7 @@
             d="M172 120a44 44 0 1 1-44-44a44 44 0 0 1 44 44Zm60 8A104 104 0 1 1 128 24a104.2 104.2 0 0 1 104 104Zm-16 0a88 88 0 1 0-153.8 58.4a81.3 81.3 0 0 1 24.5-23a59.7 59.7 0 0 0 82.6 0a81.3 81.3 0 0 1 24.5 23A87.6 87.6 0 0 0 216 128Z"
           ></path>
         </svg>
-        {{ email }}
+        {{ userEmail }}
       </div>
     </div>
   </header>
@@ -55,17 +55,21 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapState } from 'pinia';
+import { storeToRefs } from 'pinia';
 
 import { useAuthStore } from '@/stores/AuthStore';
-import { useWatchlistStore } from '@/stores/WatchlistStore';
+import { useWatchlistStore } from '../stores/WatchlistStore';
 
 export default defineComponent({
-  computed: {
-    ...mapState(useAuthStore, ['email', 'isAuthenticated']),
-    ...mapState(useWatchlistStore, {
-      watchlistItems: 'count',
-    }),
+  setup() {
+    const { size } = storeToRefs(useWatchlistStore());
+    const { userEmail, isLoggedIn } = storeToRefs(useAuthStore());
+
+    return {
+      userEmail,
+      isLoggedIn,
+      size,
+    };
   },
 });
 </script>

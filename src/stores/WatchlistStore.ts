@@ -1,35 +1,36 @@
-import { defineStore } from 'pinia';
 import type { Book } from '@/types';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { computed, ref } from 'vue';
 
-export type WatchlistStore = {
-  list: Map<string, Book>;
-};
+export const useWatchlistStore = defineStore('WatchlistStore', () => {
+  const list = ref<Map<string, Book>>(
+    new Map(JSON.parse(localStorage.getItem('watchlist') ?? '[]')),
+  );
 
-export const useWatchlistStore = defineStore('WatchlistStore', {
-  state: () =>
-    ({
-      list: new Map(JSON.parse(localStorage.getItem('watchlist') ?? '[]')),
-    } as WatchlistStore),
-  getters: {
-    count: (state) => state.list.size,
-  },
-  actions: {
-    add(book: Book) {
-      this.list.set(book.isbn, book);
-    },
-    remove(book: Book) {
-      this.list.delete(book.isbn);
-    },
-    update(book: Book) {
-      if (this.list.has(book.isbn)) {
-        this.list.delete(book.isbn);
-      } else {
-        this.list.set(book.isbn, book);
-      }
-    },
-    clear() {
-      localStorage.setItem('watchlist', JSON.stringify([]));
-      this.$reset();
-    },
-  },
+  const size = computed(() => list.value.size);
+
+  function add(book: Book) {
+    const isbn = book.isbn;
+    if (list.value.has(isbn)) {
+      list.value.delete(isbn);
+    } else {
+      list.value.set(isbn, book);
+    }
+  }
+
+  function reset() {
+    localStorage.setItem('watchlist', JSON.stringify([]));
+    list.value.clear();
+  }
+
+  return {
+    list,
+    add,
+    size,
+    reset,
+  };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useWatchlistStore, import.meta.hot));
+}

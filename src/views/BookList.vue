@@ -1,45 +1,36 @@
 <template>
-  <BookTableList :books="books" :watched-books="watchedBooks" @watch="addToWatchlist" />
+  <BookTableList
+    :books="bookStore.books"
+    :watched-books="watchlistStore.list"
+    @watch="watchlistStore.add"
+  />
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 
+import { useBookStore } from '../stores/BookStore';
+import { useWatchlistStore } from '../stores/WatchlistStore';
 import BookTableList from '../components/BookTableList.vue';
-import type { Book } from '../types';
-import { mapActions, mapState } from 'pinia';
-import { useBookStore } from '@/stores/BookStore';
-import { useWatchlistStore } from '@/stores/WatchlistStore';
-
-type ComponentData = {
-  search: string;
-};
 
 export default defineComponent({
   name: 'BookList',
   components: {
     BookTableList,
   },
-  data(): ComponentData {
+  setup() {
+    const search = ref('');
+
+    const watchlistStore = useWatchlistStore();
+    const bookStore = useBookStore();
+
+    bookStore.get();
+
     return {
-      search: '',
+      search,
+      watchlistStore,
+      bookStore,
     };
-  },
-  computed: {
-    ...mapState(useBookStore, ['books']),
-    ...mapState(useWatchlistStore, {
-      watchedBooks: 'list',
-    }),
-  },
-  methods: {
-    ...mapActions(useBookStore, ['getBooks']),
-    ...mapActions(useWatchlistStore, ['update']),
-    addToWatchlist(book: Book) {
-      this.update(book);
-    },
-  },
-  created() {
-    this.getBooks();
   },
 });
 </script>

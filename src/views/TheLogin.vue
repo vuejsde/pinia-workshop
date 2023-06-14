@@ -17,8 +17,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { mapActions } from 'pinia';
+import { defineComponent, reactive, toRefs } from 'vue';
 
 import { useAuthStore } from '@/stores/AuthStore';
 
@@ -32,24 +31,28 @@ type ComponentData = {
 
 export default defineComponent({
   name: 'BookNew',
-  data(): ComponentData {
-    return {
+  setup() {
+    const state = reactive<ComponentData>({
       user: {
         email: '',
         password: '',
       },
       success: false,
+    });
+    const authStore = useAuthStore();
+
+    async function submit() {
+      state.success = false;
+
+      authStore.login(state.user);
+
+      state.success = true;
+    }
+
+    return {
+      submit,
+      ...toRefs(state),
     };
-  },
-  methods: {
-    ...mapActions(useAuthStore, ['login']),
-    submit() {
-      this.success = false;
-
-      this.login(this.user);
-
-      this.success = true;
-    },
   },
 });
 </script>

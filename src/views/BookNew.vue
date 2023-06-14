@@ -58,11 +58,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 
 import type { Book } from '@/types';
 import { required, minLength } from '@/utils/validations';
-import { mapActions } from 'pinia';
 import { useBookStore } from '@/stores/BookStore';
 
 type ComponentData = {
@@ -75,80 +74,94 @@ type ComponentData = {
 
 export default defineComponent({
   name: 'BookNew',
-  data(): ComponentData {
-    return {
-      book: {
-        title: '',
-        abstract: '',
-        author: '',
-        isbn: '',
-      },
-      errors: {
-        title: '',
-        abstract: '',
-        author: '',
-        isbn: '',
-      },
-      success: false,
-    };
-  },
-  computed: {
-    isInvalid(): boolean {
-      return Object.keys(this.errors).some(
-        (val) => this.errors[val as keyof ComponentData['errors']] !== '',
+  setup() {
+    const bookStore = useBookStore();
+    const book = ref<ComponentData['book']>({
+      title: '',
+      abstract: '',
+      author: '',
+      isbn: '',
+    });
+
+    const errors = ref({
+      title: '',
+      abstract: '',
+      author: '',
+      isbn: '',
+    });
+    const success = ref(false);
+
+    const isInvalid = computed(() => {
+      return Object.keys(errors.value).some(
+        (val) => errors.value[val as keyof ComponentData['errors']] !== '',
       );
-    },
-  },
-  methods: {
-    ...mapActions(useBookStore, ['create']),
-    async submit() {
-      this.success = false;
+    });
 
-      await this.create(this.book);
+    async function submit() {
+      success.value = false;
 
-      this.book = {
+      bookStore.create(book.value);
+
+      book.value = {
         title: '',
         abstract: '',
         author: '',
         isbn: '',
       };
 
-      this.success = true;
-    },
-    validateTitle() {
-      if (!required(this.book?.title ?? '')) {
-        this.errors.title = 'Title is required.';
-      } else if (!minLength(this.book?.title ?? '', 5)) {
-        this.errors.title = 'The title must be at least 5 characters long.';
+      success.value = true;
+    }
+
+    function validateTitle() {
+      if (!required(book.value?.title ?? '')) {
+        errors.value.title = 'Title is required.';
+      } else if (!minLength(book.value?.title ?? '', 5)) {
+        errors.value.title = 'The title must be at least 5 characters long.';
       } else {
-        this.errors.title = '';
+        errors.value.title = '';
       }
-    },
-    validateAbstract() {
-      if (!required(this.book?.abstract ?? '')) {
-        this.errors.abstract = 'Abstract is required.';
-      } else if (!minLength(this.book?.abstract ?? '', 12)) {
-        this.errors.abstract = 'The abstract must be at least 12 characters long.';
+    }
+
+    function validateAbstract() {
+      if (!required(book.value?.abstract ?? '')) {
+        errors.value.abstract = 'Abstract is required.';
+      } else if (!minLength(book.value?.abstract ?? '', 12)) {
+        errors.value.abstract = 'The abstract must be at least 12 characters long.';
       } else {
-        this.errors.abstract = '';
+        errors.value.abstract = '';
       }
-    },
-    validateAuthor() {
-      if (!required(this.book?.author ?? '')) {
-        this.errors.author = 'Author is required.';
+    }
+
+    function validateAuthor() {
+      if (!required(book.value?.author ?? '')) {
+        errors.value.author = 'Author is required.';
       } else {
-        this.errors.author = '';
+        errors.value.author = '';
       }
-    },
-    validateIsbn() {
-      if (!required(this.book?.isbn ?? '')) {
-        this.errors.isbn = 'Isbn is required.';
-      } else if (!minLength(this.book?.isbn ?? '', 13)) {
-        this.errors.isbn = 'The isbn must be at least 13 characters long.';
+    }
+
+    function validateIsbn() {
+      if (!required(book.value?.isbn ?? '')) {
+        errors.value.isbn = 'Isbn is required.';
+      } else if (!minLength(book.value?.isbn ?? '', 13)) {
+        errors.value.isbn = 'The isbn must be at least 13 characters long.';
       } else {
-        this.errors.isbn = '';
+        errors.value.isbn = '';
       }
-    },
+    }
+
+    return {
+      bookStore,
+      book,
+      errors,
+      success,
+      isInvalid,
+      validateTitle,
+      validateAbstract,
+      validateAuthor,
+      validateIsbn,
+      submit,
+    };
   },
 });
 </script>

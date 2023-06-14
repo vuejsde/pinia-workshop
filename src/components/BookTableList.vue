@@ -17,14 +17,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, ref, computed, type PropType } from 'vue';
 
 import BookListItem from '@/components/BookListItem.vue';
 import type { Book } from '../types';
-
-type ComponentData = {
-  search: string;
-};
 
 export default defineComponent({
   name: 'BookList',
@@ -45,15 +41,17 @@ export default defineComponent({
       default: false,
     },
   },
-  data(): ComponentData {
+  setup(props) {
+    const search = ref('');
+
+    const filteredBooks = computed<Book[]>(() => {
+      return props.books.filter((book) => book.title.includes(search.value));
+    });
+
     return {
-      search: '',
+      search,
+      filteredBooks,
     };
-  },
-  computed: {
-    filteredBooks(): Book[] {
-      return this.books.filter((book) => book.title.includes(this.search));
-    },
   },
   emits: {
     watch(book: Book) {
